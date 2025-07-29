@@ -20,7 +20,7 @@
 
 ## Live Demo
 
-Visit the live application: [shadow-vault-two.vercel.app](https://shadow-vault-two.vercel.app)
+Visit the live application: [shadow-vault-wallet](https://shadow-vault-wallet.vercel.app/)
 
 ## Tech Stack
 
@@ -56,7 +56,7 @@ npm install --legacy-peer-deps
 npm run dev
 ```
 
-The application will be available at `http://localhost:5173`
+The application will be available at `http://localhost:5173 or 8080`
 
 ## Building for Production
 
@@ -107,9 +107,9 @@ src/
 ## Supported Networks
 
 - **Ethereum (ETH)** - Mainnet and testnets
-- **Bitcoin (BTC)** - Mainnet and testnets
 - **Polygon (MATIC)** - Polygon network
 - **Binance Smart Chain (BNB)** - BSC network
+- **Avalanche (AVAX)** - Avalanche network
 
 ## Usage
 
@@ -147,7 +147,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Links
 
-- **Live Demo**: [shadow-vault-two.vercel.app](https://shadow-vault-two.vercel.app)
+- **Live Demo**: [shadow-vault-wallet.vercel.app](https://shadow-vault-wallet.vercel.app/)
 - **GitHub Repository**: [github.com/vigneshbunny/shadow_vault](https://github.com/vigneshbunny/shadow_vault)
 - **Issues**: [GitHub Issues](https://github.com/vigneshbunny/shadow_vault/issues)
 
@@ -160,4 +160,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Made with love for privacy and security**
+**Made with privacy and security**
