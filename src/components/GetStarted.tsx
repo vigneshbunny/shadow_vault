@@ -75,7 +75,7 @@ const GetStarted = () => {
                 Pre-built and ready to secure your crypto assets.
               </p>
               <Button variant="hero" className="w-full" asChild>
-                <a href="https://github.com/vigneshbunny" target="_blank" rel="noopener noreferrer">
+                <a href="https://github.com/vigneshbunny/shadow_vault" target="_blank" rel="noopener noreferrer">
                   <Download className="w-4 h-4 mr-2" />
                   Download v1.0.0
                 </a>
@@ -96,7 +96,7 @@ const GetStarted = () => {
                 Perfect for advanced users and security audits.
               </p>
               <Button variant="outline" className="w-full" asChild>
-                <a href="https://github.com/vigneshbunny" target="_blank" rel="noopener noreferrer">
+                <a href="https://github.com/vigneshbunny/shadow_vault" target="_blank" rel="noopener noreferrer">
                   <Github className="w-4 h-4 mr-2" />
                   View Source Code
                 </a>

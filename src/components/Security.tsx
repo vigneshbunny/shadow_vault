@@ -72,7 +72,7 @@ const Security = () => {
             not obscurity. Join the community of privacy advocates building the future of digital sovereignty.
           </p>
           <Button variant="outline" size="lg" asChild>
-            <a href="https://github.com/vigneshbunny" target="_blank" rel="noopener noreferrer">
+            <a href="https://github.com/vigneshbunny/shadow_vault" target="_blank" rel="noopener noreferrer">
               Audit Our Code on GitHub
             </a>
           </Button>

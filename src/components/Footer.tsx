@@ -10,7 +10,7 @@ const Footer = () => {
       { name: "Roadmap", href: "#" }
     ],
     community: [
-      { name: "GitHub", href: "#", icon: Github },
+      { name: "GitHub", href: "https://github.com/vigneshbunny/shadow_vault", icon: Github },
       { name: "Discord", href: "#", icon: MessageCircle },
       { name: "Twitter", href: "#", icon: Twitter },
       { name: "Telegram", href: "#", icon: MessageCircle }
