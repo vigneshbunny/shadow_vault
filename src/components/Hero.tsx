@@ -57,7 +57,7 @@ const Hero = () => {
             Launch Shadow Vault
           </Button>
           <Button variant="outline" size="lg" className="text-lg px-8 py-6" asChild>
-            <a href="https://github.com/vigneshbunny" target="_blank" rel="noopener noreferrer">
+            <a href="https://github.com/vigneshbunny/shadow_vault" target="_blank" rel="noopener noreferrer">
               <Github className="w-5 h-5 mr-2" />
               View Source Code
             </a>

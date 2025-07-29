@@ -1,4 +1,4 @@
-# Shadow Vault 🔐
+# Shadow Vault
 
 **The most secure and private cryptocurrency wallet. Zero tracking, complete anonymity, full sovereignty.**
 
@@ -7,22 +7,22 @@
 [![React](https://img.shields.io/badge/React-20232A?style=flat&logo=react&logoColor=61DAFB)](https://reactjs.org/)
 [![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat&logo=vite&logoColor=white)](https://vitejs.dev/)
 
-## 🌟 Features
+## Features
 
-- **🔒 Military-Grade Encryption** - AES-256 encryption protects all sensitive data
-- **👁️ No Tracking** - Zero analytics, logs, or user behavior tracking
-- **💾 Local Storage Only** - All data stored locally on your device, never on servers
-- **🔑 Self-Custody** - You own and control your private keys completely
-- **🔐 Secure Authentication** - Local password protection with secure verification
-- **🗑️ Data Destruction** - Permanent data clearing on logout for maximum security
-- **📱 Mobile-First Design** - Optimized for mobile devices with responsive UI
-- **🎨 Modern UI** - Beautiful, intuitive interface built with shadcn/ui and Tailwind CSS
+- **Military-Grade Encryption** - AES-256 encryption protects all sensitive data
+- **No Tracking** - Zero analytics, logs, or user behavior tracking
+- **Local Storage Only** - All data stored locally on your device, never on servers
+- **Self-Custody** - You own and control your private keys completely
+- **Secure Authentication** - Local password protection with secure verification
+- **Data Destruction** - Permanent data clearing on logout for maximum security
+- **Mobile-First Design** - Optimized for mobile devices with responsive UI
+- **Modern UI** - Beautiful, intuitive interface built with shadcn/ui and Tailwind CSS
 
-## 🚀 Live Demo
+## Live Demo
 
 Visit the live application: [shadow-vault-two.vercel.app](https://shadow-vault-two.vercel.app)
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Frontend Framework**: React 18 with TypeScript
 - **Build Tool**: Vite
@@ -33,7 +33,7 @@ Visit the live application: [shadow-vault-two.vercel.app](https://shadow-vault-t
 - **Crypto**: Web Crypto API
 - **Routing**: React Router DOM
 
-## 📦 Installation
+## Installation
 
 ### Prerequisites
 
@@ -58,7 +58,7 @@ npm run dev
 
 The application will be available at `http://localhost:5173`
 
-## 🏗️ Building for Production
+## Building for Production
 
 ```bash
 # Build the project
@@ -68,7 +68,7 @@ npm run build
 npm run preview
 ```
 
-## 🔧 Development
+## Development
 
 ### Available Scripts
 
@@ -90,7 +90,7 @@ src/
 └── ui/            # shadcn/ui components
 ```
 
-## 🔐 Security Features
+## Security Features
 
 ### Privacy by Design
 - **Zero Server Communication** - All operations happen locally
@@ -104,14 +104,14 @@ src/
 - **Password Protection** - Local password for accessing sensitive data
 - **Secure Logout** - Complete data destruction on logout
 
-## 🌐 Supported Networks
+## Supported Networks
 
 - **Ethereum (ETH)** - Mainnet and testnets
 - **Bitcoin (BTC)** - Mainnet and testnets
 - **Polygon (MATIC)** - Polygon network
 - **Binance Smart Chain (BNB)** - BSC network
 
-## 📱 Usage
+## Usage
 
 1. **Create Wallet** - Generate a new wallet with secure seed phrase
 2. **Import Wallet** - Import existing wallets using private key or seed phrase
@@ -120,7 +120,7 @@ src/
 5. **View Balances** - Real-time balance tracking with USD values
 6. **Security Settings** - Manage wallet security and backup options
 
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions! Please read our contributing guidelines:
 
@@ -137,21 +137,21 @@ We welcome contributions! Please read our contributing guidelines:
 - Ensure all tests pass
 - Update documentation as needed
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## ⚠️ Disclaimer
+## Disclaimer
 
 **Important**: This is experimental software. Use at your own risk. Always verify your transactions and keep your private keys secure. The developers are not responsible for any loss of funds.
 
-## 🔗 Links
+## Links
 
 - **Live Demo**: [shadow-vault-two.vercel.app](https://shadow-vault-two.vercel.app)
 - **GitHub Repository**: [github.com/vigneshbunny/shadow_vault](https://github.com/vigneshbunny/shadow_vault)
 - **Issues**: [GitHub Issues](https://github.com/vigneshbunny/shadow_vault/issues)
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - Built with [React](https://reactjs.org/)
 - UI components from [shadcn/ui](https://ui.shadcn.com/)
@@ -160,4 +160,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Made with ❤️ for privacy and security**
+**Made with love for privacy and security**
