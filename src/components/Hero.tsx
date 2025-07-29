@@ -47,7 +47,7 @@ const Hero = () => {
         </p>
         
         <p className="text-lg text-muted-foreground/80 mb-12 max-w-3xl mx-auto">
-          Pure anonymity. Zero tracking. Complete privacy. Your keys. your crypto. your sovereignty.
+          Pure anonymity. Zero tracking. Complete privacy. Your keys. Your crypto. Your sovereignty.
         </p>
 
         {/* CTA Buttons */}
