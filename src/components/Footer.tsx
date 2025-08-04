@@ -40,7 +40,7 @@ const Footer = () => {
             </p>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Shield className="w-4 h-4 text-primary" />
-              <span>Privacy by Design</span>
+              <span>Privacy by Shadow Vault</span>
             </div>
           </div>
 
