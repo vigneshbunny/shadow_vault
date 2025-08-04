@@ -10,7 +10,6 @@ import { useLocation } from "react-router-dom";
 import * as QrReader from 'react-qr-reader';
 import { BrowserQRCodeReader } from '@zxing/browser';
 import { useEffect } from "react";
-import CameraDebug from "@/components/CameraDebug";
 
 const Scan = () => {
   const navigate = useNavigate();
@@ -389,7 +388,6 @@ const Scan = () => {
       </div>
 
       <BottomNavigation currentPage="scan" />
-      <CameraDebug />
     </div>
   );
 };
