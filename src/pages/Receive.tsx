@@ -191,10 +191,10 @@ const Receive = () => {
               <QRCode
                 value={walletAddress}
                 size={200}
-                bgColor="#18181b"
-                fgColor="#fff"
+                bgColor="#ffffff"
+                fgColor="#000000"
                 level="H"
-                style={{ background: '#18181b', padding: 8, borderRadius: 12 }}
+                style={{ background: '#ffffff', padding: 8, borderRadius: 12 }}
               />
             </div>
             

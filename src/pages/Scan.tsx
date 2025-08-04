@@ -100,34 +100,38 @@ const Scan = () => {
         videoElement.play().catch(console.error);
       };
       
-      // Simple QR reader setup - no complex timing
-      codeReaderRef.current = new BrowserQRCodeReader();
-      codeReaderRef.current.decodeFromVideoDevice(undefined, videoElement, (result, err, controls) => {
+             // Simple QR reader setup with better error handling
+       codeReaderRef.current = new BrowserQRCodeReader();
+       codeReaderRef.current.decodeFromVideoDevice(undefined, videoElement, (result, err, controls) => {
         if (isUnmountedRef.current) return;
         if (controls && !controlsRef.current) {
           controlsRef.current = controls;
         }
-        if (result) {
-          setScannedData(result.getText());
-          setIsCameraActive(false);
-          if (controlsRef.current) controlsRef.current.stop();
-          toast({
-            title: "QR Code Scanned!",
-            description: "Address detected successfully",
-          });
-          if (action === 'send') {
-            navigate(`/send`, { state: { address: result.getText() } });
-          }
-        }
-        // Only show fatal errors, ignore scanning errors
-        if (err) {
-          const nonFatal = ["notfoundexception", "checksumexception", "formatexception"];
-          if (err.name && nonFatal.some(type => err.name.toLowerCase().includes(type))) {
-            return; // Keep scanning
-          }
-          // Only show error for real camera issues
-          console.error('Camera error:', err);
-        }
+                 if (result) {
+           const scannedText = result.getText();
+           console.log('QR Code scanned:', scannedText);
+           setScannedData(scannedText);
+           setIsCameraActive(false);
+           if (controlsRef.current) controlsRef.current.stop();
+           toast({
+             title: "QR Code Scanned!",
+             description: "Address detected successfully",
+           });
+           if (action === 'send') {
+             navigate(`/send`, { state: { address: scannedText } });
+           }
+         }
+                 // Only show fatal errors, ignore scanning errors
+         if (err) {
+           const nonFatal = ["notfoundexception", "checksumexception", "formatexception"];
+           if (err.name && nonFatal.some(type => err.name.toLowerCase().includes(type))) {
+             return; // Keep scanning
+           }
+           // Only show error for real camera issues, not scanning errors
+           if (err.name !== 'NotFoundException' && err.name !== 'ChecksumException' && err.name !== 'FormatException') {
+             console.error('Camera error:', err);
+           }
+         }
       });
       
     } catch (error: any) {
