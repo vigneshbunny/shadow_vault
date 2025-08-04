@@ -121,16 +121,10 @@ const Scan = () => {
              navigate(`/send`, { state: { address: scannedText } });
            }
          }
-                 // Only show fatal errors, ignore scanning errors
+                 // Ignore all scanning errors - they're normal when no QR code is detected
          if (err) {
-           const nonFatal = ["notfoundexception", "checksumexception", "formatexception"];
-           if (err.name && nonFatal.some(type => err.name.toLowerCase().includes(type))) {
-             return; // Keep scanning
-           }
-           // Only show error for real camera issues, not scanning errors
-           if (err.name !== 'NotFoundException' && err.name !== 'ChecksumException' && err.name !== 'FormatException') {
-             console.error('Camera error:', err);
-           }
+           // Don't log anything - these are normal scanning errors
+           return; // Keep scanning
          }
       });
       
