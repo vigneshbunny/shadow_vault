@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Camera, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import BottomNavigation from "@/components/BottomNavigation";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,7 @@ import { useLocation } from "react-router-dom";
 import * as QrReader from 'react-qr-reader';
 import { BrowserQRCodeReader } from '@zxing/browser';
 import { useEffect } from "react";
+import CameraDebug from "@/components/CameraDebug";
 
 const Scan = () => {
   const navigate = useNavigate();
@@ -20,11 +21,34 @@ const Scan = () => {
   const [cameraError, setCameraError] = useState("");
   const [cameraErrorDetail, setCameraErrorDetail] = useState("");
   const [isCameraActive, setIsCameraActive] = useState(true);
+  const [isHttps, setIsHttps] = useState(true);
+  const [cameraPermission, setCameraPermission] = useState<'granted' | 'denied' | 'prompt' | 'unknown'>('unknown');
   const videoRef = useRef<HTMLVideoElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const codeReaderRef = useRef<BrowserQRCodeReader | null>(null);
   const controlsRef = useRef<any>(null);
   const isUnmountedRef = useRef(false);
+
+  // Check HTTPS and camera permissions on mount
+  useEffect(() => {
+    // Check if we're on HTTPS
+    const protocol = window.location.protocol;
+    setIsHttps(protocol === 'https:');
+    
+    // Check camera permissions
+    if (navigator.permissions && navigator.permissions.query) {
+      navigator.permissions.query({ name: 'camera' as PermissionName })
+        .then((permissionStatus) => {
+          setCameraPermission(permissionStatus.state);
+          permissionStatus.onchange = () => {
+            setCameraPermission(permissionStatus.state);
+          };
+        })
+        .catch(() => {
+          setCameraPermission('unknown');
+        });
+    }
+  }, []);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -44,43 +68,101 @@ const Scan = () => {
     };
   }, []);
 
+  const startCamera = async () => {
+    // Check HTTPS requirement
+    if (!isHttps) {
+      setCameraError("Camera access requires HTTPS");
+      setCameraErrorDetail("Please access this site via HTTPS to use the camera scanner");
+      setIsCameraActive(false);
+      return;
+    }
+
+    // Check camera permissions
+    if (cameraPermission === 'denied') {
+      setCameraError("Camera permission denied");
+      setCameraErrorDetail("Please enable camera access in your browser settings");
+      setIsCameraActive(false);
+      return;
+    }
+
+    try {
+      // Request camera permission explicitly
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { 
+          facingMode: 'environment',
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        } 
+      });
+      
+      // If we get here, permission was granted
+      setCameraPermission('granted');
+      
+      // Set up QR reader
+      codeReaderRef.current = new BrowserQRCodeReader();
+      const videoElement = videoRef.current;
+      if (!videoElement) return;
+      
+      codeReaderRef.current.decodeFromVideoDevice(undefined, videoElement, (result, err, controls) => {
+        if (isUnmountedRef.current) return;
+        if (controls && !controlsRef.current) {
+          controlsRef.current = controls;
+        }
+        if (result) {
+          setScannedData(result.getText());
+          setIsCameraActive(false);
+          if (controlsRef.current) controlsRef.current.stop();
+          toast({
+            title: "QR Code Scanned!",
+            description: "Address detected successfully",
+          });
+          if (action === 'send') {
+            navigate(`/send`, { state: { address: result.getText() } });
+          }
+        }
+        // Only show a fatal error for real camera/permission issues
+        if (err) {
+          // Accept NotFoundException, ChecksumException, and FormatException variants as non-fatal (keep scanning)
+          const nonFatal = ["notfoundexception", "checksumexception", "formatexception"];
+          if (err.name && nonFatal.some(type => err.name.toLowerCase().includes(type))) {
+            // Do nothing, keep scanning
+            return;
+          }
+          // For other errors, show error and stop camera
+          setCameraError("Camera error: " + (err.message || err.name));
+          setCameraErrorDetail(err.message || String(err));
+          setIsCameraActive(false);
+          if (controlsRef.current) controlsRef.current.stop();
+        }
+      });
+    } catch (error: any) {
+      console.error('Camera error:', error);
+      
+      // Handle specific error types
+      if (error.name === 'NotAllowedError') {
+        setCameraError("Camera access denied");
+        setCameraErrorDetail("Please allow camera access when prompted");
+        setCameraPermission('denied');
+      } else if (error.name === 'NotFoundError') {
+        setCameraError("No camera found");
+        setCameraErrorDetail("No camera device detected on your device");
+      } else if (error.name === 'NotSupportedError') {
+        setCameraError("Camera not supported");
+        setCameraErrorDetail("Your browser doesn't support camera access");
+      } else if (error.name === 'NotReadableError') {
+        setCameraError("Camera in use");
+        setCameraErrorDetail("Camera is being used by another application");
+      } else {
+        setCameraError("Camera error: " + (error.message || error.name));
+        setCameraErrorDetail(error.message || String(error));
+      }
+      setIsCameraActive(false);
+    }
+  };
+
   useEffect(() => {
     if (!isCameraActive) return;
-    codeReaderRef.current = new BrowserQRCodeReader();
-    const videoElement = videoRef.current;
-    if (!videoElement) return;
-    codeReaderRef.current.decodeFromVideoDevice(undefined, videoElement, (result, err, controls) => {
-      if (isUnmountedRef.current) return;
-      if (controls && !controlsRef.current) {
-        controlsRef.current = controls;
-      }
-      if (result) {
-        setScannedData(result.getText());
-        setIsCameraActive(false);
-        if (controlsRef.current) controlsRef.current.stop();
-        toast({
-          title: "QR Code Scanned!",
-          description: "Address detected successfully",
-        });
-        if (action === 'send') {
-          navigate(`/send`, { state: { address: result.getText() } });
-        }
-      }
-      // Only show a fatal error for real camera/permission issues
-      if (err) {
-        // Accept NotFoundException, ChecksumException, and FormatException variants as non-fatal (keep scanning)
-        const nonFatal = ["notfoundexception", "checksumexception", "formatexception"];
-        if (err.name && nonFatal.some(type => err.name.toLowerCase().includes(type))) {
-          // Do nothing, keep scanning
-          return;
-        }
-        // For other errors, show error and stop camera
-        setCameraError("Camera error: " + (err.message || err.name));
-        setCameraErrorDetail(err.message || String(err));
-        setIsCameraActive(false);
-        if (controlsRef.current) controlsRef.current.stop();
-      }
-    });
+    startCamera();
     return () => {
       if (controlsRef.current) {
         controlsRef.current.stop();
@@ -215,6 +297,32 @@ const Scan = () => {
             <CardTitle>QR Code Scanner</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* HTTPS Warning */}
+            {!isHttps && (
+              <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                <div className="flex items-center space-x-2 text-yellow-600">
+                  <AlertTriangle className="w-4 h-4" />
+                  <span className="font-medium">HTTPS Required</span>
+                </div>
+                <p className="text-sm text-yellow-600/80 mt-1">
+                  Camera access requires HTTPS. Please access this site via HTTPS to use the camera scanner.
+                </p>
+              </div>
+            )}
+
+            {/* Camera Permission Status */}
+            {cameraPermission === 'denied' && (
+              <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+                <div className="flex items-center space-x-2 text-red-600">
+                  <Camera className="w-4 h-4" />
+                  <span className="font-medium">Camera Permission Denied</span>
+                </div>
+                <p className="text-sm text-red-600/80 mt-1">
+                  Please enable camera access in your browser settings to use the scanner.
+                </p>
+              </div>
+            )}
+
             <div className="aspect-square bg-muted/20 rounded-lg flex items-center justify-center border-2 border-dashed border-muted">
               <div className="text-center space-y-4 w-full">
                 {isCameraActive && !cameraError && (
@@ -222,11 +330,25 @@ const Scan = () => {
                 )}
                 {cameraError && (
                   <div className="text-red-500 text-sm">
-                    {cameraError}
+                    <div className="flex items-center justify-center space-x-2 mb-2">
+                      <AlertTriangle className="w-4 h-4" />
+                      <span className="font-medium">{cameraError}</span>
+                    </div>
                     {cameraErrorDetail && (
-                      <div className="text-xs text-muted-foreground mt-1">{cameraErrorDetail}</div>
+                      <div className="text-xs text-muted-foreground mt-1 mb-3">{cameraErrorDetail}</div>
                     )}
-                    <Button onClick={() => { setCameraError(""); setCameraErrorDetail(""); setIsCameraActive(true); }} variant="outline" size="sm" className="mt-2">Retry Camera</Button>
+                    <Button 
+                      onClick={() => { 
+                        setCameraError(""); 
+                        setCameraErrorDetail(""); 
+                        setIsCameraActive(true); 
+                      }} 
+                      variant="outline" 
+                      size="sm" 
+                      className="mt-2"
+                    >
+                      Retry Camera
+                    </Button>
                   </div>
                 )}
                 <Button onClick={() => setIsCameraActive(!isCameraActive)} variant="outline" size="sm">
@@ -275,6 +397,7 @@ const Scan = () => {
       </div>
 
       <BottomNavigation currentPage="scan" />
+      <CameraDebug />
     </div>
   );
 };
