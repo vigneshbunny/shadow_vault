@@ -23,7 +23,6 @@ const Scan = () => {
   const [isCameraActive, setIsCameraActive] = useState(true);
   const [isHttps, setIsHttps] = useState(true);
   const [cameraPermission, setCameraPermission] = useState<'granted' | 'denied' | 'prompt' | 'unknown'>('unknown');
-  const [isVideoReady, setIsVideoReady] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const codeReaderRef = useRef<BrowserQRCodeReader | null>(null);
@@ -70,9 +69,6 @@ const Scan = () => {
   }, []);
 
   const startCamera = async () => {
-    // Reset video ready state
-    setIsVideoReady(false);
-    
     // Check HTTPS requirement
     if (!isHttps) {
       setCameraError("Camera access requires HTTPS");
@@ -90,136 +86,53 @@ const Scan = () => {
     }
 
     try {
-      // Request camera permission explicitly with mobile-optimized settings
+      // Request camera permission with simple settings
       const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { 
-          facingMode: 'environment',
-          width: { ideal: 640, max: 1280 },
-          height: { ideal: 480, max: 720 },
-          frameRate: { ideal: 30, max: 30 }
-        } 
+        video: { facingMode: 'environment' } 
       });
       
-      // If we get here, permission was granted
-      setCameraPermission('granted');
-      
-      // Set the stream to the video element first
+      // Set the stream to the video element
       const videoElement = videoRef.current;
       if (!videoElement) return;
       
       videoElement.srcObject = stream;
       videoElement.onloadedmetadata = () => {
-        // Add a small delay for mobile devices to ensure video is ready
-        setTimeout(() => {
-          videoElement.play().then(() => {
-            setIsVideoReady(true);
-          }).catch((error) => {
-            console.error('Video play error:', error);
-            // Try again with a different approach for mobile
-            if (error.name === 'NotAllowedError') {
-              videoElement.muted = true;
-              videoElement.play().then(() => {
-                setIsVideoReady(true);
-              }).catch(console.error);
-            }
-          });
-        }, 100);
+        videoElement.play().catch(console.error);
       };
       
-      // Set up QR reader after video is ready with a longer delay for mobile
-      setTimeout(() => {
+      // Simple QR reader setup - no complex timing
+      codeReaderRef.current = new BrowserQRCodeReader();
+      codeReaderRef.current.decodeFromVideoDevice(undefined, videoElement, (result, err, controls) => {
         if (isUnmountedRef.current) return;
-        
-        try {
-          codeReaderRef.current = new BrowserQRCodeReader();
-          
-          // Only start decoding if we're still active and have a valid reader
-          if (codeReaderRef.current && videoElement && videoElement.srcObject) {
-            codeReaderRef.current.decodeFromVideoDevice(undefined, videoElement, (result, err, controls) => {
-              if (isUnmountedRef.current) return;
-              if (controls && !controlsRef.current) {
-                controlsRef.current = controls;
-              }
-              if (result) {
-                setScannedData(result.getText());
-                setIsCameraActive(false);
-                if (controlsRef.current) controlsRef.current.stop();
-                toast({
-                  title: "QR Code Scanned!",
-                  description: "Address detected successfully",
-                });
-                if (action === 'send') {
-                  navigate(`/send`, { state: { address: result.getText() } });
-                }
-              }
-              // Only show a fatal error for real camera/permission issues
-              if (err) {
-                // Accept NotFoundException, ChecksumException, and FormatException variants as non-fatal (keep scanning)
-                const nonFatal = ["notfoundexception", "checksumexception", "formatexception"];
-                if (err.name && nonFatal.some(type => err.name.toLowerCase().includes(type))) {
-                  // Do nothing, keep scanning
-                  return;
-                }
-                // For other errors, show error and stop camera
-                setCameraError("Camera error: " + (err.message || err.name));
-                setCameraErrorDetail(err.message || String(err));
-                setIsCameraActive(false);
-                if (controlsRef.current) controlsRef.current.stop();
-              }
-            });
-          } else {
-            // If video element is not ready, try again after a short delay
-            setTimeout(() => {
-              if (isUnmountedRef.current || !videoElement || !videoElement.srcObject) {
-                setCameraError("Video stream not ready");
-                setCameraErrorDetail("Camera initialized but video stream failed to load");
-                setIsCameraActive(false);
-                return;
-              }
-              
-              if (codeReaderRef.current) {
-                codeReaderRef.current.decodeFromVideoDevice(undefined, videoElement, (result, err, controls) => {
-                  if (isUnmountedRef.current) return;
-                  if (controls && !controlsRef.current) {
-                    controlsRef.current = controls;
-                  }
-                  if (result) {
-                    setScannedData(result.getText());
-                    setIsCameraActive(false);
-                    if (controlsRef.current) controlsRef.current.stop();
-                    toast({
-                      title: "QR Code Scanned!",
-                      description: "Address detected successfully",
-                    });
-                    if (action === 'send') {
-                      navigate(`/send`, { state: { address: result.getText() } });
-                    }
-                  }
-                  if (err) {
-                    const nonFatal = ["notfoundexception", "checksumexception", "formatexception"];
-                    if (err.name && nonFatal.some(type => err.name.toLowerCase().includes(type))) {
-                      return;
-                    }
-                    setCameraError("Camera error: " + (err.message || err.name));
-                    setCameraErrorDetail(err.message || String(err));
-                    setIsCameraActive(false);
-                    if (controlsRef.current) controlsRef.current.stop();
-                  }
-                });
-              }
-            }, 1000);
-          }
-        } catch (error: any) {
-          console.error('QR Reader initialization error:', error);
-          setCameraError("QR Reader initialization failed");
-          setCameraErrorDetail(error.message || String(error));
-          setIsCameraActive(false);
+        if (controls && !controlsRef.current) {
+          controlsRef.current = controls;
         }
-      }, 1000);
+        if (result) {
+          setScannedData(result.getText());
+          setIsCameraActive(false);
+          if (controlsRef.current) controlsRef.current.stop();
+          toast({
+            title: "QR Code Scanned!",
+            description: "Address detected successfully",
+          });
+          if (action === 'send') {
+            navigate(`/send`, { state: { address: result.getText() } });
+          }
+        }
+        // Only show fatal errors, ignore scanning errors
+        if (err) {
+          const nonFatal = ["notfoundexception", "checksumexception", "formatexception"];
+          if (err.name && nonFatal.some(type => err.name.toLowerCase().includes(type))) {
+            return; // Keep scanning
+          }
+          // Only show error for real camera issues
+          console.error('Camera error:', err);
+        }
+      });
+      
     } catch (error: any) {
       console.error('Camera error:', error);
       
-      // Handle specific error types
       if (error.name === 'NotAllowedError') {
         setCameraError("Camera access denied");
         setCameraErrorDetail("Please allow camera access when prompted");
