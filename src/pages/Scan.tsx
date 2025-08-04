@@ -86,12 +86,13 @@ const Scan = () => {
     }
 
     try {
-      // Request camera permission explicitly
+      // Request camera permission explicitly with mobile-optimized settings
       const stream = await navigator.mediaDevices.getUserMedia({ 
         video: { 
           facingMode: 'environment',
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
+          width: { ideal: 640, max: 1280 },
+          height: { ideal: 480, max: 720 },
+          frameRate: { ideal: 30, max: 30 }
         } 
       });
       
@@ -104,11 +105,23 @@ const Scan = () => {
       
       videoElement.srcObject = stream;
       videoElement.onloadedmetadata = () => {
-        videoElement.play().catch(console.error);
+        // Add a small delay for mobile devices to ensure video is ready
+        setTimeout(() => {
+          videoElement.play().catch((error) => {
+            console.error('Video play error:', error);
+            // Try again with a different approach for mobile
+            if (error.name === 'NotAllowedError') {
+              videoElement.muted = true;
+              videoElement.play().catch(console.error);
+            }
+          });
+        }, 100);
       };
       
-      // Set up QR reader after video is ready
-      codeReaderRef.current = new BrowserQRCodeReader();
+      // Set up QR reader after video is ready with a delay for mobile
+      setTimeout(() => {
+        codeReaderRef.current = new BrowserQRCodeReader();
+      }, 200);
       
       codeReaderRef.current.decodeFromVideoDevice(undefined, videoElement, (result, err, controls) => {
         if (isUnmountedRef.current) return;

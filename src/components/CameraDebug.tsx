@@ -51,7 +51,15 @@ const CameraDebug = () => {
 
   const testCamera = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      // Try with mobile-optimized settings first
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { 
+          facingMode: 'environment',
+          width: { ideal: 640, max: 1280 },
+          height: { ideal: 480, max: 720 },
+          frameRate: { ideal: 30, max: 30 }
+        } 
+      });
       setDebugInfo(prev => ({
         ...prev,
         cameraTest: 'success',
@@ -60,12 +68,25 @@ const CameraDebug = () => {
       // Stop the stream immediately
       stream.getTracks().forEach(track => track.stop());
     } catch (error: any) {
-      setDebugInfo(prev => ({
-        ...prev,
-        cameraTest: 'failed',
-        cameraTestError: error.message,
-        cameraTestErrorName: error.name,
-      }));
+      // If first attempt fails, try with basic settings
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { facingMode: 'environment' } 
+        });
+        setDebugInfo(prev => ({
+          ...prev,
+          cameraTest: 'success',
+          cameraTestError: null,
+        }));
+        stream.getTracks().forEach(track => track.stop());
+      } catch (fallbackError: any) {
+        setDebugInfo(prev => ({
+          ...prev,
+          cameraTest: 'failed',
+          cameraTestError: fallbackError.message,
+          cameraTestErrorName: fallbackError.name,
+        }));
+      }
     }
   };
 
@@ -226,17 +247,28 @@ const CameraDebug = () => {
                   </div>
                 </div>
               )}
-              {!debugInfo.hasMediaDevices && (
-                <div className="flex items-start space-x-2 p-2 bg-red-500/10 rounded">
-                  <XCircle className="w-4 h-4 text-red-600 mt-0.5" />
-                  <div>
-                    <div className="font-medium text-red-600">Not Supported</div>
-                    <div className="text-red-600/80">
-                      Your browser doesn't support camera access.
-                    </div>
-                  </div>
-                </div>
-              )}
+                             {!debugInfo.hasMediaDevices && (
+                 <div className="flex items-start space-x-2 p-2 bg-red-500/10 rounded">
+                   <XCircle className="w-4 h-4 text-red-600 mt-0.5" />
+                   <div>
+                     <div className="font-medium text-red-600">Not Supported</div>
+                     <div className="text-red-600/80">
+                       Your browser doesn't support camera access.
+                     </div>
+                   </div>
+                 </div>
+               )}
+               {debugInfo.cameraTestErrorName === 'NotReadableError' && (
+                 <div className="flex items-start space-x-2 p-2 bg-orange-500/10 rounded">
+                   <AlertTriangle className="w-4 h-4 text-orange-600 mt-0.5" />
+                   <div>
+                     <div className="font-medium text-orange-600">Camera in Use</div>
+                     <div className="text-orange-600/80">
+                       Camera is being used by another app. Close other camera apps and try again.
+                     </div>
+                   </div>
+                 </div>
+               )}
             </div>
           </div>
 
