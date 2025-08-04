@@ -120,41 +120,46 @@ const Scan = () => {
       
       // Set up QR reader after video is ready with a delay for mobile
       setTimeout(() => {
-        codeReaderRef.current = new BrowserQRCodeReader();
-      }, 200);
-      
-      codeReaderRef.current.decodeFromVideoDevice(undefined, videoElement, (result, err, controls) => {
         if (isUnmountedRef.current) return;
-        if (controls && !controlsRef.current) {
-          controlsRef.current = controls;
-        }
-        if (result) {
-          setScannedData(result.getText());
-          setIsCameraActive(false);
-          if (controlsRef.current) controlsRef.current.stop();
-          toast({
-            title: "QR Code Scanned!",
-            description: "Address detected successfully",
+        
+        codeReaderRef.current = new BrowserQRCodeReader();
+        
+        // Only start decoding if we're still active and have a valid reader
+        if (codeReaderRef.current && videoElement) {
+          codeReaderRef.current.decodeFromVideoDevice(undefined, videoElement, (result, err, controls) => {
+            if (isUnmountedRef.current) return;
+            if (controls && !controlsRef.current) {
+              controlsRef.current = controls;
+            }
+            if (result) {
+              setScannedData(result.getText());
+              setIsCameraActive(false);
+              if (controlsRef.current) controlsRef.current.stop();
+              toast({
+                title: "QR Code Scanned!",
+                description: "Address detected successfully",
+              });
+              if (action === 'send') {
+                navigate(`/send`, { state: { address: result.getText() } });
+              }
+            }
+            // Only show a fatal error for real camera/permission issues
+            if (err) {
+              // Accept NotFoundException, ChecksumException, and FormatException variants as non-fatal (keep scanning)
+              const nonFatal = ["notfoundexception", "checksumexception", "formatexception"];
+              if (err.name && nonFatal.some(type => err.name.toLowerCase().includes(type))) {
+                // Do nothing, keep scanning
+                return;
+              }
+              // For other errors, show error and stop camera
+              setCameraError("Camera error: " + (err.message || err.name));
+              setCameraErrorDetail(err.message || String(err));
+              setIsCameraActive(false);
+              if (controlsRef.current) controlsRef.current.stop();
+            }
           });
-          if (action === 'send') {
-            navigate(`/send`, { state: { address: result.getText() } });
-          }
         }
-        // Only show a fatal error for real camera/permission issues
-        if (err) {
-          // Accept NotFoundException, ChecksumException, and FormatException variants as non-fatal (keep scanning)
-          const nonFatal = ["notfoundexception", "checksumexception", "formatexception"];
-          if (err.name && nonFatal.some(type => err.name.toLowerCase().includes(type))) {
-            // Do nothing, keep scanning
-            return;
-          }
-          // For other errors, show error and stop camera
-          setCameraError("Camera error: " + (err.message || err.name));
-          setCameraErrorDetail(err.message || String(err));
-          setIsCameraActive(false);
-          if (controlsRef.current) controlsRef.current.stop();
-        }
-      });
+      }, 500);
     } catch (error: any) {
       console.error('Camera error:', error);
       
