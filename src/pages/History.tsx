@@ -142,7 +142,7 @@ const History = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/90 to-primary/10 pb-20">
       <div className="p-6 space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
           <div className="flex items-center space-x-4">
             <Button
               onClick={() => navigate('/home')}
@@ -152,7 +152,10 @@ const History = () => {
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <h1 className="text-2xl font-bold">Transaction History</h1>
-            <div className="ml-4 w-48">
+          </div>
+          
+          <div className="flex items-center space-x-3">
+            <div className="w-32 sm:w-48">
               <Select value={selectedCoin} onValueChange={setSelectedCoin}>
                 <SelectTrigger className="bg-background text-foreground border-input">
                   <SelectValue placeholder="Select network" />
@@ -165,16 +168,16 @@ const History = () => {
                 </SelectContent>
               </Select>
             </div>
+            
+            <Button
+              onClick={() => loadTransactions(selectedCoin, address)}
+              variant="ghost"
+              size="icon"
+              disabled={isLoading}
+            >
+              <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
+            </Button>
           </div>
-          
-          <Button
-            onClick={() => loadTransactions(selectedCoin, address)}
-            variant="ghost"
-            size="icon"
-            disabled={isLoading}
-          >
-            <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
-          </Button>
         </div>
 
         {isLoading ? (

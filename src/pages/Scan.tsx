@@ -98,10 +98,17 @@ const Scan = () => {
       // If we get here, permission was granted
       setCameraPermission('granted');
       
-      // Set up QR reader
-      codeReaderRef.current = new BrowserQRCodeReader();
+      // Set the stream to the video element first
       const videoElement = videoRef.current;
       if (!videoElement) return;
+      
+      videoElement.srcObject = stream;
+      videoElement.onloadedmetadata = () => {
+        videoElement.play().catch(console.error);
+      };
+      
+      // Set up QR reader after video is ready
+      codeReaderRef.current = new BrowserQRCodeReader();
       
       codeReaderRef.current.decodeFromVideoDevice(undefined, videoElement, (result, err, controls) => {
         if (isUnmountedRef.current) return;
